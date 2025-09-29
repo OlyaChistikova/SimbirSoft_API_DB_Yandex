@@ -34,8 +34,7 @@ public class GetDiskTest {
                 .then()
                 .statusCode(200)
                 .body("user.login", equalTo(LOGIN))
-                .body("user.display_name", equalTo(LOGIN))
-                .log().all();
+                .body("user.display_name", equalTo(LOGIN));
     }
 
     @Test
@@ -48,7 +47,6 @@ public class GetDiskTest {
                 .statusCode(401)
                 .body("error", equalTo("UnauthorizedError"))
                 .body("description", notNullValue())
-                .body("message", notNullValue())
-                .log().all();
+                .body("message", notNullValue());
     }
 }
