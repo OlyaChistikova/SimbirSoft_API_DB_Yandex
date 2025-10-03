@@ -3,6 +3,8 @@ package tests;
 import helpers.BaseRequests;
 import org.testng.annotations.Test;
 
+import static helpers.BaseRequests.DISK_PATH;
+import static helpers.BaseRequests.LOGIN;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
