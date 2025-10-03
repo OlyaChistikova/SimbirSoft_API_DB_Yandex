@@ -2,7 +2,10 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
     <entry key="apiUrl">https://cloud-api.yandex.net/</entry>
-    <entry key="token">y0__xCDuOeKBxjblgMgmvrXxBQwh7mdlwg0-gBfRnRym5igIgszdZhsBdI-Uw</entry>
+    <entry key="token">y0__xDaloCvBRjblgMgr6mHxhQwp7PfuAho-HFFyIpGYFSCb0cdMlEy2FqwUA</entry>
+    <entry key="username">tchistikowa.o</entry>
     <entry key="disk_path">v1/disk</entry>
-    <entry key="username">tchistikova.olha</entry>
+    <entry key="resources_path">v1/disk/resources</entry>
+    <entry key="trash_resources_path">v1/disk/trash/resources</entry>
+    <entry key="return_resources_path">v1/disk/trash/resources/restore</entry>
 </properties>
