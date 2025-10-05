@@ -1,6 +1,5 @@
 package tests;
 
-import helpers.BaseRequests;
 import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -8,6 +7,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static helpers.BaseRequests.*;
 
@@ -17,36 +17,37 @@ public class DeleteFolderTest extends BaseTest{
     @BeforeMethod
     public void createPostForDelete() {
         folderName = "Удаляемая папка";
-        createFolderRequest(folderName);
+        createResource(RESOURCES_PATH, Map.of("path", folderName), 201);
     }
 
     @AfterClass
     public void cleanTrash(){
-        cleanTrashResourcesAfterDelete();
+        deleteResource(TRASH_RESOURCES_PATH, null, 202);
     }
 
     @Test
     public void deleteCorrectFolderWithAuthTest() {
-        Response responseDeleteFolder = deleteFolderAuthRequest(folderName);
+        Response responseDeleteFolder = deleteResource(RESOURCES_PATH, Map.of("path", folderName), 204);
 
         Assert.assertTrue(responseDeleteFolder.getBody().asString().isEmpty());
 
-        List<String> listFolders = BaseRequests.getAllNamesFoldersRequest();
+        Response response = getResource(RESOURCES_PATH, Map.of("path", "disk:/"), 200);
+        List<String> folderNames = response.jsonPath().getList("_embedded.items.name");
 
-        Assert.assertFalse(listFolders.contains(folderName));
+        Assert.assertFalse(folderNames.contains(folderName));
     }
 
     @Test
     public void deleteRemovedFolderWithAuthTest() {
-        deleteFolderRequest(folderName);
+        deleteResource(RESOURCES_PATH, Map.of("path", folderName), 204);
 
-        Response responseGetFolder = getUnExistentFolderAuthRequest(folderName);
+        Response responseGetFolder = getResource(RESOURCES_PATH, Map.of("path", folderName), 404);
 
         Assert.assertNotNull(responseGetFolder.path("error"));
         Assert.assertNotNull(responseGetFolder.path("description"));
         Assert.assertNotNull(responseGetFolder.path("message"));
 
-        Response responseDeleteFolder = deleteAlreadyDeletedFolderAuthRequest(folderName);
+        Response responseDeleteFolder = deleteResource(RESOURCES_PATH, Map.of("path", folderName), 404);
 
         Assert.assertNotNull(responseDeleteFolder.path("error"));
         Assert.assertNotNull(responseDeleteFolder.path("description"));
@@ -55,16 +56,17 @@ public class DeleteFolderTest extends BaseTest{
 
     @Test
     public void deleteFolderWithoutAuthTest() {
-        Response responseDeleteFolder = deleteFolderWithoutAuthRequest(folderName);
+        Response responseDeleteFolder = sendDeleteRequestWithoutAuth(RESOURCES_PATH, Map.of("path", folderName), 401);
 
         Assert.assertNotNull(responseDeleteFolder.path("error"));
         Assert.assertNotNull(responseDeleteFolder.path("description"));
         Assert.assertNotNull(responseDeleteFolder.path("message"));
 
-        List<String> listFolders = BaseRequests.getAllNamesFoldersRequest();
+        Response response = getResource(RESOURCES_PATH, Map.of("path", "disk:/"), 200);
+        List<String> folderNames = response.jsonPath().getList("_embedded.items.name");
 
-        Assert.assertTrue(listFolders.contains(folderName));
+        Assert.assertTrue(folderNames.contains(folderName));
 
-        deleteFolderAuthRequest(folderName);
+        deleteResource(RESOURCES_PATH, Map.of("path", folderName), 204);
     }
 }
