@@ -1,38 +1,29 @@
 package tests;
 
 import helpers.BaseRequests;
+import io.restassured.response.Response;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static helpers.BaseRequests.DISK_PATH;
 import static helpers.BaseRequests.LOGIN;
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 
 public class GetDiskTest extends BaseTest{
 
     @Test
     public void getDiskWithAuthTest(){
-        given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .when()
-                .get(DISK_PATH)
-                .then()
-                .statusCode(200)
-                .body("user.login", equalTo(LOGIN))
-                .body("user.display_name", equalTo(LOGIN));
+        Response responseGetDisk = getResource(DISK_PATH, null, 200);
+
+        Assert.assertEquals(responseGetDisk.path("user.login"), LOGIN);
+        Assert.assertEquals(responseGetDisk.path("user.display_name"), LOGIN);
     }
 
     @Test
     public void getDiskWithoutAuthTest(){
-        given()
-                .spec(BaseRequests.requestSpec())
-                .when()
-                .get(DISK_PATH)
-                .then()
-                .statusCode(401)
-                .body("error", equalTo("UnauthorizedError"))
-                .body("description", notNullValue())
-                .body("message", notNullValue());
+        Response responseGetDisk = BaseRequests.sendGetRequestWithoutAuth(DISK_PATH, null, 401);
+
+        Assert.assertEquals(responseGetDisk.path("error"), "UnauthorizedError");
+        Assert.assertNotNull(responseGetDisk.path("description"));
+        Assert.assertNotNull(responseGetDisk.path("message"));
     }
 }
