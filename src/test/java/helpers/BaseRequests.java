@@ -5,7 +5,6 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
-import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
@@ -16,6 +15,11 @@ public class BaseRequests {
      * Токен авторизации для доступа к API.
      */
     public static final String TOKEN = ParametersProvider.getProperty("token");
+
+    /**
+     * Базовый URL API.
+     */
+    public static final String API_URL = ParametersProvider.getProperty("apiUrl");
 
     /**
      * Путь для взаимодействия с ресурсами.
@@ -33,7 +37,7 @@ public class BaseRequests {
     public static final String RETURN_RESOURCES_PATH = ParametersProvider.getProperty("return_resources_path");
 
     /**
-     * Данные для авторизации
+     * Имя пользователя для авторизации.
      */
     public static final String LOGIN = ParametersProvider.getProperty("username");
 
@@ -42,242 +46,125 @@ public class BaseRequests {
      */
     public static final String DISK_PATH = ParametersProvider.getProperty("disk_path");
 
-
-    public static RequestSpecification requestSpec(String authToken) {
+    /**
+     * Создает конфигурацию запроса с авторизацией.
+     * @return объект RequestSpecification с настройками для авторизованного запроса.
+     */
+    private static RequestSpecification getRequestSpecWithAuth() {
         return new RequestSpecBuilder()
-                .setBaseUri(ParametersProvider.getProperty("apiUrl"))
+                .setBaseUri(API_URL)
                 .setContentType(ContentType.JSON)
-                .addHeader("Authorization", "OAuth " + authToken)
-                .build();
-    }
-
-    public static RequestSpecification requestSpec() {
-        return new RequestSpecBuilder()
-                .setBaseUri(ParametersProvider.getProperty("apiUrl"))
-                .setContentType(ContentType.JSON)
+                .addHeader("Authorization", "OAuth " + TOKEN)
                 .build();
     }
 
     /**
-     * Выполняет запрос на добавление папки по указанному названию с авторизацией.
-     *
-     * @param pathData название папки, которую необходимо добавить.
-     * @return объект Response, содержащий ответ сервера.
+     * Создает конфигурацию запроса без авторизации.
+     * @return объект RequestSpecification с настройками для неавторизованного запроса.
      */
-    public static Response addFolderAuthRequest(String pathData) {
+    private static RequestSpecification getRequestSpecWithoutAuth() {
+        return new RequestSpecBuilder()
+                .setBaseUri(API_URL)
+                .setContentType(ContentType.JSON)
+                .build();
+    }
+
+    /**
+     * Отправляет GET-запрос к API.
+     * @param withAuth указывает, нужно ли использовать авторизацию.
+     * @param endpoint относительный путь API.
+     * @param params параметры запроса.
+     * @param expectedStatus ожидаемый HTTP статус ответа.
+     * @return объект Response с ответом сервера.
+     */
+    private static Response sendGetRequest(boolean withAuth, String endpoint, Map<String, String> params, int expectedStatus) {
         return given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .param("path", pathData)
+                .spec(withAuth ? getRequestSpecWithAuth() : getRequestSpecWithoutAuth())
+                .params(params != null ? params : Map.of())
                 .when()
-                .put(RESOURCES_PATH)
+                .get(endpoint)
                 .then()
-                .statusCode(201)
+                .statusCode(expectedStatus)
                 .extract().response();
     }
 
     /**
-     * Выполняет запрос на добавление папки с некорректными параметрами
-     *
-     * @param pathData название папки, который передается в запрос. Может содержать некорректное или пустое значение.
-     * @return объект Response, содержащий ответ сервера
+     * Отправляет PUT-запрос к API.
+     * @param withAuth указывает, нужно ли использовать авторизацию.
+     * @param endpoint относительный путь API.
+     * @param params параметры запроса.
+     * @param expectedStatus ожидаемый HTTP статус ответа.
+     * @return объект Response с ответом сервера.
      */
-    public static Response addFolderIncorrectParamsRequest(String pathData) {
+    private static Response sendPutRequest(boolean withAuth, String endpoint, Map<String, String> params, int expectedStatus) {
         return given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .param("path", pathData)
+                .spec(withAuth ? getRequestSpecWithAuth() : getRequestSpecWithoutAuth())
+                .params(params != null ? params : Map.of())
                 .when()
-                .put(RESOURCES_PATH)
+                .put(endpoint)
                 .then()
-                .statusCode(400)
+                .statusCode(expectedStatus)
                 .extract().response();
     }
 
     /**
-     * Выполняет запрос на добавление папки с недопустимыми параметрами
-     *
-     * @param pathData название папки, который передается в запрос. Может содержать несуществующие значения.
-     * @return объект Response, содержащий ответ сервера
+     * Отправляет DELETE-запрос к API.
+     * @param withAuth указывает, нужно ли использовать авторизацию.
+     * @param endpoint относительный путь API.
+     * @param params параметры запроса.
+     * @param expectedStatus ожидаемый HTTP статус ответа.
+     * @return объект Response с ответом сервера.
      */
-    public static Response addFolderInvalidParamsRequest(String pathData) {
+    private static Response sendDeleteRequest(boolean withAuth, String endpoint, Map<String, String> params, int expectedStatus) {
         return given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .param("path", pathData)
+                .spec(withAuth ? getRequestSpecWithAuth() : getRequestSpecWithoutAuth())
+                .params(params != null ? params : Map.of())
                 .when()
-                .put(RESOURCES_PATH)
+                .delete(endpoint)
                 .then()
-                .statusCode(404)
+                .statusCode(expectedStatus)
                 .extract().response();
     }
 
     /**
-     * Выполняет запрос на добавление папки без авторизации.
-     *
-     * @param pathData название папки, которую необходимо добавить.
-     * @return объект Response, содержащий ответ сервера.
+     * Отправляет GET-запрос с авторизацией и проверяет статус.
      */
-    public static Response addFolderWithoutAuthRequest(String pathData) {
-        return given()
-                .spec(BaseRequests.requestSpec())
-                .param("path", pathData)
-                .when()
-                .put(RESOURCES_PATH)
-                .then()
-                .statusCode(401)
-                .extract().response();
+    public static Response sendGetRequestWithAuth(String endpoint, Map<String, String> params, int expectedStatus) {
+        return sendGetRequest(true, endpoint, params, expectedStatus);
     }
 
     /**
-     * Выполняет запрос на получение папки по ее названию.
-     *
-     * @param pathData название папки для получения информации.
-     * @return объект Response, содержащий ответ сервера.
+     * Отправляет GET-запрос без авторизации и проверяет статус.
      */
-    public static Response getFolderAuthRequest(String pathData) {
-        return given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .param("path", pathData)
-                .when()
-                .get(RESOURCES_PATH)
-                .then()
-                .statusCode(200)
-                .extract().response();
+    public static Response sendGetRequestWithoutAuth(String endpoint, Map<String, String> params, int expectedStatus) {
+        return sendGetRequest(false, endpoint, params, expectedStatus);
     }
 
     /**
-     * Выполняет запрос на получение несуществующей папки с авторизацией.
-     *
-     * @param pathData название папки, которой не существует.
-     * @return объект Response, содержащий ответ сервера.
+     * Отправляет PUT-запрос с авторизацией и проверяет статус.
      */
-    public static Response getUnExistentFolderAuthRequest(String pathData) {
-        return given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .param("path", pathData)
-                .when()
-                .get(RESOURCES_PATH)
-                .then()
-                .statusCode(404)
-                .extract().response();
+    public static Response sendPutRequestWithAuth(String endpoint, Map<String, String> params, int expectedStatus) {
+        return sendPutRequest(true, endpoint, params, expectedStatus);
     }
 
     /**
-     * Выполняет запрос на получение всех имен папок с авторизацией.
-     *
-     * @return список имен папок
+     * Отправляет PUT-запрос без авторизации и проверяет статус.
      */
-    public static List<String> getAllNamesFoldersRequest() {
-        return given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .param("path", "disk:/")
-                .when()
-                .get(RESOURCES_PATH)
-                .then()
-                .statusCode(200)
-                .extract()
-                .jsonPath()
-                .getList("_embedded.items.name");
+    public static Response sendPutRequestWithoutAuth(String endpoint, Map<String, String> params, int expectedStatus) {
+        return sendPutRequest(false, endpoint, params, expectedStatus);
     }
 
     /**
-     * Выполняет запрос на удаление папки по имени папки с авторизацией.
-     *
-     * @param pathData название папки для удаления.
-     * @return объект Response, содержащий ответ сервера.
+     * Отправляет DELETE-запрос с авторизацией и проверяет статус.
      */
-    public static Response deleteFolderAuthRequest(String pathData) {
-        return given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .param("path", pathData)
-                .when()
-                .delete(RESOURCES_PATH)
-                .then()
-                .statusCode(204)
-                .extract().response();
+    public static Response sendDeleteRequestWithAuth(String endpoint, Map<String, String> params, int expectedStatus) {
+        return sendDeleteRequest(true, endpoint, params, expectedStatus);
     }
 
     /**
-     * Выполняет запрос на удаление уже удаленной папки.
-     *
-     * @param pathData название папки, которая уже удалена.
-     * @return объект Response, содержащий ответ сервера.
+     * Отправляет DELETE-запрос без авторизации и проверяет статус.
      */
-    public static Response deleteAlreadyDeletedFolderAuthRequest(String pathData) {
-        return given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .param("path", pathData)
-                .when()
-                .delete(RESOURCES_PATH)
-                .then()
-                .statusCode(404)
-                .extract().response();
-    }
-
-    /**
-     * Выполняет запрос на удаление папки без авторизации.
-     *
-     * @param pathData название папки для удаления.
-     * @return объект Response, содержащий ответ сервера.
-     */
-    public static Response deleteFolderWithoutAuthRequest(String pathData) {
-        return given()
-                .spec(BaseRequests.requestSpec())
-                .param("path", pathData)
-                .when()
-                .delete(RESOURCES_PATH)
-                .then()
-                .statusCode(401)
-                .extract().response();
-    }
-
-    /**
-     * Выполняет запрос для получения корзины с удаленными папками с авторизацией.
-     *
-     * @return список папок в корзине.
-     */
-    public static List<Map<String, Object>> checkTrashFoldersAuthRequest() {
-        return given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .param("path")
-                .when()
-                .get(TRASH_RESOURCES_PATH)
-                .then()
-                .statusCode(200)
-                .extract()
-                .jsonPath()
-                .getList("_embedded.items");
-    }
-
-    /**
-     * Выполняет запрос для восстановления папки по названию с авторизацией.
-     *
-     * @param pathData название папки для восстановления.
-     * @return объект Response, содержащий ответ сервера.
-     */
-    public static Response returnFolderAuthRequest(String pathData) {
-        return given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .param("path", pathData)
-                .when()
-                .put(RETURN_RESOURCES_PATH)
-                .then()
-                .statusCode(201)
-                .extract().response();
-    }
-
-    /**
-     * Выполняет запрос для восстановления папки по названию без авторизации.
-     *
-     * @param pathData название папки для восстановления.
-     * @return объект Response, содержащий ответ сервера.
-     */
-    public static Response returnFolderWithoutAuthRequest(String pathData) {
-        return given()
-                .spec(BaseRequests.requestSpec())
-                .param("path", pathData)
-                .when()
-                .put(RETURN_RESOURCES_PATH)
-                .then()
-                .statusCode(401)
-                .extract().response();
+    public static Response sendDeleteRequestWithoutAuth(String endpoint, Map<String, String> params, int expectedStatus) {
+        return sendDeleteRequest(false, endpoint, params, expectedStatus);
     }
 }
