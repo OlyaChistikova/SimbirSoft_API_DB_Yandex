@@ -10,14 +10,13 @@ import org.testng.annotations.Test;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
-import static helpers.BaseRequests.getFolderAuthRequest;
+import java.util.Map;
 
 public class CreateFolderTest extends BaseTest {
 
     @AfterClass
     public void cleanTrash(){
-        cleanTrashResourcesAfterDelete();
+        deleteResource(TRASH_RESOURCES_PATH, null, 202);
     }
 
     @DataProvider(name = "createSuccessNameFolder")
@@ -33,18 +32,18 @@ public class CreateFolderTest extends BaseTest {
     @Test(dataProvider = "createSuccessNameFolder")
     public void createFolderAuthTest(String folderName){
         String encodedParam = URLEncoder.encode(folderName, StandardCharsets.UTF_8);
-        Response responseCreateFolder = BaseRequests.addFolderAuthRequest(folderName);
+        Response responseCreateFolder = createResource(RESOURCES_PATH, Map.of("path", folderName), 201);
 
         Assert.assertEquals(responseCreateFolder.path("method"), "GET");
         Assert.assertTrue(responseCreateFolder.path("href").toString().endsWith(encodedParam));
         Assert.assertNotNull(responseCreateFolder.path("templated"));
 
-        Response responseGetFolder = getFolderAuthRequest(folderName);
+        Response responseGetFolder = getResource(RESOURCES_PATH, Map.of("path", folderName), 200);
 
         Assert.assertEquals(responseGetFolder.path("name"), folderName);
         Assert.assertEquals(responseGetFolder.path("path"), "disk:/" + folderName);
 
-        deleteFolderRequest(folderName);
+        deleteResource(RESOURCES_PATH, Map.of("path", folderName), 204);
     }
 
     @DataProvider(name = "createInvalidNameFolder")
@@ -57,15 +56,16 @@ public class CreateFolderTest extends BaseTest {
 
     @Test(dataProvider = "createInvalidNameFolder")
     public void createFailedFolderWithInvalidParamsTest(String invalid_folder_name){
-        Response responseCreateFolder = BaseRequests.addFolderInvalidParamsRequest(invalid_folder_name);
+        Response responseCreateFolder = createResource(RESOURCES_PATH, Map.of("path", invalid_folder_name), 404);
 
         Assert.assertNotNull(responseCreateFolder.path("error"));
         Assert.assertNotNull(responseCreateFolder.path("description"));
         Assert.assertNotNull(responseCreateFolder.path("message"));
 
-        List<String> listFolders = BaseRequests.getAllNamesFoldersRequest();
+        Response response = getResource(RESOURCES_PATH, Map.of("path", "disk:/"), 200);
+        List<String> folderNames = response.jsonPath().getList("_embedded.items.name");
 
-        Assert.assertFalse(listFolders.contains(invalid_folder_name));
+        Assert.assertFalse(folderNames.contains(invalid_folder_name));
     }
 
     @DataProvider(name = "createIncorrectNameFolder")
@@ -78,28 +78,30 @@ public class CreateFolderTest extends BaseTest {
 
     @Test(dataProvider = "createIncorrectNameFolder")
     public void createFailedFolderWithEmptyOrIncorrectParamsTest(String incorrect_folder_name){
-        Response responseCreateFolder = BaseRequests.addFolderIncorrectParamsRequest(incorrect_folder_name);
+        Response responseCreateFolder = createResource(RESOURCES_PATH, Map.of("path", incorrect_folder_name), 400);
 
         Assert.assertNotNull(responseCreateFolder.path("error"));
         Assert.assertNotNull(responseCreateFolder.path("description"));
         Assert.assertNotNull(responseCreateFolder.path("message"));
 
-        List<String> listFolders = BaseRequests.getAllNamesFoldersRequest();
+        Response response = getResource(RESOURCES_PATH, Map.of("path", "disk:/"), 200);
+        List<String> folderNames = response.jsonPath().getList("_embedded.items.name");
 
-        Assert.assertFalse(listFolders.contains(incorrect_folder_name));
+        Assert.assertFalse(folderNames.contains(incorrect_folder_name));
     }
 
     @Test
     public void createFolderWithoutAuthTest(){
         String folder_name = "Новая папка";
-        Response responseCreateFolder = BaseRequests.addFolderWithoutAuthRequest(folder_name);
+        Response responseCreateFolder = BaseRequests.sendPutRequestWithoutAuth(RESOURCES_PATH, Map.of("path", folder_name), 401);
 
         Assert.assertNotNull(responseCreateFolder.path("error"));
         Assert.assertNotNull(responseCreateFolder.path("description"));
         Assert.assertNotNull(responseCreateFolder.path("message"));
 
-        List<String> listFolders = BaseRequests.getAllNamesFoldersRequest();
+        Response response = getResource(RESOURCES_PATH, Map.of("path", "disk:/"), 200);
+        List<String> folderNames = response.jsonPath().getList("_embedded.items.name");
 
-        Assert.assertFalse(listFolders.contains(folder_name));
+        Assert.assertFalse(folderNames.contains(folder_name));
     }
 }
