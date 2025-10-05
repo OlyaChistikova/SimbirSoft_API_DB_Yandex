@@ -19,18 +19,19 @@ public class ReturnFolderTest extends BaseTest{
     @BeforeMethod
     public void deleteFolderForReturn(){
         folderName = "Возвращаемая папка";
-        createFolderRequest(folderName);
-        deleteFolderRequest(folderName);
+        createResource(RESOURCES_PATH, Map.of("path", folderName), 201);
+        deleteResource(RESOURCES_PATH, Map.of("path", folderName), 204);
     }
 
     @AfterClass
     public void cleanTrash(){
-        cleanTrashResourcesAfterDelete();
+        deleteResource(TRASH_RESOURCES_PATH, null, 202);
     }
 
     @Test
     public void returnRemovedFolderTest(){
-        List<Map<String, Object>> responseTrashList = checkTrashFoldersAuthRequest();
+        Response response = getResource(TRASH_RESOURCES_PATH, null, 200);
+        List<Map<String, Object>> responseTrashList = response.jsonPath().getList("_embedded.items");
 
         boolean folderExists = responseTrashList.stream()
                 .anyMatch(item -> folderName.equals(item.get("name")));
@@ -42,24 +43,25 @@ public class ReturnFolderTest extends BaseTest{
                 .orElseThrow(() -> new AssertionError("Папка с именем " + folderName + " не найдена в корзине"))
                 .get("path").toString();
 
-        Response responseReturnFolder = returnFolderAuthRequest(folderPath);
+        Response responseReturnFolder = createResource(RETURN_RESOURCES_PATH, Map.of("path", folderPath), 201);
         String encodedParam = URLEncoder.encode(folderName, StandardCharsets.UTF_8);
 
         Assert.assertEquals(responseReturnFolder.path("method"), "GET");
         Assert.assertTrue(responseReturnFolder.path("href").toString().endsWith(encodedParam));
         Assert.assertNotNull(responseReturnFolder.path("templated"));
 
-        Response responseGetFolder = getFolderAuthRequest(folderName);
+        Response responseGetFolder = getResource(RESOURCES_PATH, Map.of("path", folderName), 200);
 
         Assert.assertEquals(responseGetFolder.path("name"), folderName);
         Assert.assertEquals(responseGetFolder.path("path"), "disk:/" + folderName);
 
-        deleteFolderRequest(folderName);
+        deleteResource(RESOURCES_PATH, Map.of("path", folderName), 204);
     }
 
     @Test
     public void returnRemovedFolderWithoutAuthTest(){
-        List<Map<String, Object>> responseTrashList = checkTrashFoldersAuthRequest();
+        Response response = getResource(TRASH_RESOURCES_PATH, null, 200);
+        List<Map<String, Object>> responseTrashList = response.jsonPath().getList("_embedded.items");
 
         boolean folderExists = responseTrashList.stream()
                 .anyMatch(item -> folderName.equals(item.get("name")));
@@ -71,13 +73,13 @@ public class ReturnFolderTest extends BaseTest{
                 .orElseThrow(() -> new AssertionError("Папка с именем " + folderName + " не найдена в корзине"))
                 .get("path").toString();
 
-        Response responseReturnFolder = returnFolderWithoutAuthRequest(folderPath);
+        Response responseReturnFolder = sendPutRequestWithoutAuth(RETURN_RESOURCES_PATH, Map.of("path", folderPath), 401);
 
         Assert.assertNotNull(responseReturnFolder.path("error"));
         Assert.assertNotNull(responseReturnFolder.path("description"));
         Assert.assertNotNull(responseReturnFolder.path("message"));
 
-        Response responseGetFolder = getUnExistentFolderAuthRequest(folderName);
+        Response responseGetFolder = getResource(RESOURCES_PATH, Map.of("path", folderName), 404);
 
         Assert.assertNotNull(responseGetFolder.path("error"));
         Assert.assertNotNull(responseGetFolder.path("description"));
