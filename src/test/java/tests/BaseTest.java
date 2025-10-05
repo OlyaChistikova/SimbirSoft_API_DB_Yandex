@@ -1,15 +1,11 @@
 package tests;
 
 import helpers.BaseRequests;
+import io.restassured.response.Response;
 
-import static io.restassured.RestAssured.given;
+import java.util.Map;
 
 public class BaseTest {
-
-    /**
-     * Токен авторизации для доступа к API.
-     */
-    protected static final String TOKEN = BaseRequests.TOKEN;
 
     /**
      * Путь для взаимодействия с ресурсами.
@@ -22,47 +18,32 @@ public class BaseTest {
     protected static final String TRASH_RESOURCES_PATH = BaseRequests.TRASH_RESOURCES_PATH;
 
     /**
-     * Выполняет запрос на создание папки по указанному названию.
-     *
-     * @param pathData название папки, которую необходимо создать.
+     * Создает ресурс по указанному пути с авторизацией.
+     * @param endpoint API endpoint для ресурса.
+     * @param params название или путь ресурса.
+     * @param expectedStatus ожидаемый статус код.
      */
-    public void createFolderRequest(String pathData) {
-        given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .param("path", pathData)
-                .when()
-                .put(RESOURCES_PATH)
-                .then()
-                .statusCode(201)
-                .extract().response();
+    public Response createResource(String endpoint, Map<String, String> params, int expectedStatus) {
+        return BaseRequests.sendPutRequestWithAuth(endpoint, params, expectedStatus);
     }
 
     /**
-     * Выполняет запрос на удаление папки по указанному названию.
-     *
-     * @param pathData название папки, которую необходимо удалить.
+     * Удаляет ресурс по указанному пути с авторизацией.
+     * @param endpoint API endpoint для ресурса.
+     * @param params название или путь ресурса.
+     * @param expectedStatus ожидаемый статус код.
      */
-    public void deleteFolderRequest(String pathData) {
-        given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .param("path", pathData)
-                .when()
-                .delete(RESOURCES_PATH)
-                .then()
-                .statusCode(204)
-                .extract().response();
+    public Response deleteResource(String endpoint, Map<String, String> params, int expectedStatus) {
+        return BaseRequests.sendDeleteRequestWithAuth(endpoint, params, expectedStatus);
     }
 
     /**
-     * Очищает корзину, удаляя все папки внутри
+     * Получает ресурс по-указанному endpoint.
+     * @param endpoint API endpoint для ресурса.
+     * @param params название или путь ресурса.
+     * @param expectedStatus ожидаемый статус код.
      */
-    public void cleanTrashResourcesAfterDelete() {
-        given()
-                .spec(BaseRequests.requestSpec(TOKEN))
-                .when()
-                .delete(TRASH_RESOURCES_PATH)
-                .then()
-                .statusCode(202)
-                .extract().response();
+    public Response getResource(String endpoint, Map<String, String> params, int expectedStatus) {
+        return BaseRequests.sendGetRequestWithAuth(endpoint, params, expectedStatus);
     }
 }
