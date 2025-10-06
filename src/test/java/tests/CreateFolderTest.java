@@ -12,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+import static helpers.BaseRequests.sendPutRequest;
+
 public class CreateFolderTest extends BaseTest {
 
     @AfterClass
@@ -93,7 +95,7 @@ public class CreateFolderTest extends BaseTest {
     @Test
     public void createFolderWithoutAuthTest(){
         String folder_name = "Новая папка";
-        Response responseCreateFolder = BaseRequests.sendPutRequestWithoutAuth(RESOURCES_PATH, Map.of("path", folder_name), 401);
+        Response responseCreateFolder = sendPutRequestWithoutAuth(RESOURCES_PATH, Map.of("path", folder_name), 401);
 
         Assert.assertNotNull(responseCreateFolder.path("error"));
         Assert.assertNotNull(responseCreateFolder.path("description"));
@@ -103,5 +105,12 @@ public class CreateFolderTest extends BaseTest {
         List<String> folderNames = response.jsonPath().getList("_embedded.items.name");
 
         Assert.assertFalse(folderNames.contains(folder_name));
+    }
+
+    /**
+     * Отправляет PUT-запрос без авторизации и проверяет статус.
+     */
+    public Response sendPutRequestWithoutAuth(String endpoint, Map<String, String> params, int expectedStatus) {
+        return sendPutRequest(false, endpoint, params, expectedStatus);
     }
 }
