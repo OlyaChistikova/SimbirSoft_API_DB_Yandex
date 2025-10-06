@@ -85,4 +85,11 @@ public class ReturnFolderTest extends BaseTest{
         Assert.assertNotNull(responseGetFolder.path("description"));
         Assert.assertNotNull(responseGetFolder.path("message"));
     }
+
+    /**
+     * Отправляет PUT-запрос без авторизации и проверяет статус.
+     */
+    public Response sendPutRequestWithoutAuth(String endpoint, Map<String, String> params, int expectedStatus) {
+        return sendPutRequest(false, endpoint, params, expectedStatus);
+    }
 }
