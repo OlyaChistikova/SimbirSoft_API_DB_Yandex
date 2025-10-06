@@ -24,7 +24,7 @@ public class BaseTest {
      * @param expectedStatus ожидаемый статус код.
      */
     public Response createResource(String endpoint, Map<String, String> params, int expectedStatus) {
-        return BaseRequests.sendPutRequestWithAuth(endpoint, params, expectedStatus);
+        return BaseRequests.sendPutRequest(true, endpoint, params, expectedStatus);
     }
 
     /**
@@ -34,7 +34,7 @@ public class BaseTest {
      * @param expectedStatus ожидаемый статус код.
      */
     public Response deleteResource(String endpoint, Map<String, String> params, int expectedStatus) {
-        return BaseRequests.sendDeleteRequestWithAuth(endpoint, params, expectedStatus);
+        return BaseRequests.sendDeleteRequest(true, endpoint, params, expectedStatus);
     }
 
     /**
@@ -44,6 +44,6 @@ public class BaseTest {
      * @param expectedStatus ожидаемый статус код.
      */
     public Response getResource(String endpoint, Map<String, String> params, int expectedStatus) {
-        return BaseRequests.sendGetRequestWithAuth(endpoint, params, expectedStatus);
+        return BaseRequests.sendGetRequest(true, endpoint, params, expectedStatus);
     }
 }
