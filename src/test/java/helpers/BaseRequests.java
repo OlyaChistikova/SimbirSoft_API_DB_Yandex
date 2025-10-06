@@ -77,7 +77,7 @@ public class BaseRequests {
      * @param expectedStatus ожидаемый HTTP статус ответа.
      * @return объект Response с ответом сервера.
      */
-    private static Response sendGetRequest(boolean withAuth, String endpoint, Map<String, String> params, int expectedStatus) {
+    public static Response sendGetRequest(boolean withAuth, String endpoint, Map<String, String> params, int expectedStatus) {
         return given()
                 .spec(withAuth ? getRequestSpecWithAuth() : getRequestSpecWithoutAuth())
                 .params(params != null ? params : Map.of())
@@ -96,7 +96,7 @@ public class BaseRequests {
      * @param expectedStatus ожидаемый HTTP статус ответа.
      * @return объект Response с ответом сервера.
      */
-    private static Response sendPutRequest(boolean withAuth, String endpoint, Map<String, String> params, int expectedStatus) {
+    public static Response sendPutRequest(boolean withAuth, String endpoint, Map<String, String> params, int expectedStatus) {
         return given()
                 .spec(withAuth ? getRequestSpecWithAuth() : getRequestSpecWithoutAuth())
                 .params(params != null ? params : Map.of())
@@ -115,7 +115,7 @@ public class BaseRequests {
      * @param expectedStatus ожидаемый HTTP статус ответа.
      * @return объект Response с ответом сервера.
      */
-    private static Response sendDeleteRequest(boolean withAuth, String endpoint, Map<String, String> params, int expectedStatus) {
+    public static Response sendDeleteRequest(boolean withAuth, String endpoint, Map<String, String> params, int expectedStatus) {
         return given()
                 .spec(withAuth ? getRequestSpecWithAuth() : getRequestSpecWithoutAuth())
                 .params(params != null ? params : Map.of())
@@ -124,47 +124,5 @@ public class BaseRequests {
                 .then()
                 .statusCode(expectedStatus)
                 .extract().response();
-    }
-
-    /**
-     * Отправляет GET-запрос с авторизацией и проверяет статус.
-     */
-    public static Response sendGetRequestWithAuth(String endpoint, Map<String, String> params, int expectedStatus) {
-        return sendGetRequest(true, endpoint, params, expectedStatus);
-    }
-
-    /**
-     * Отправляет GET-запрос без авторизации и проверяет статус.
-     */
-    public static Response sendGetRequestWithoutAuth(String endpoint, Map<String, String> params, int expectedStatus) {
-        return sendGetRequest(false, endpoint, params, expectedStatus);
-    }
-
-    /**
-     * Отправляет PUT-запрос с авторизацией и проверяет статус.
-     */
-    public static Response sendPutRequestWithAuth(String endpoint, Map<String, String> params, int expectedStatus) {
-        return sendPutRequest(true, endpoint, params, expectedStatus);
-    }
-
-    /**
-     * Отправляет PUT-запрос без авторизации и проверяет статус.
-     */
-    public static Response sendPutRequestWithoutAuth(String endpoint, Map<String, String> params, int expectedStatus) {
-        return sendPutRequest(false, endpoint, params, expectedStatus);
-    }
-
-    /**
-     * Отправляет DELETE-запрос с авторизацией и проверяет статус.
-     */
-    public static Response sendDeleteRequestWithAuth(String endpoint, Map<String, String> params, int expectedStatus) {
-        return sendDeleteRequest(true, endpoint, params, expectedStatus);
-    }
-
-    /**
-     * Отправляет DELETE-запрос без авторизации и проверяет статус.
-     */
-    public static Response sendDeleteRequestWithoutAuth(String endpoint, Map<String, String> params, int expectedStatus) {
-        return sendDeleteRequest(false, endpoint, params, expectedStatus);
     }
 }
