@@ -69,4 +69,11 @@ public class DeleteFolderTest extends BaseTest{
 
         deleteResource(RESOURCES_PATH, Map.of("path", folderName), 204);
     }
+
+    /**
+     * Отправляет DELETE-запрос без авторизации и проверяет статус.
+     */
+    public Response sendDeleteRequestWithoutAuth(String endpoint, Map<String, String> params, int expectedStatus) {
+        return sendDeleteRequest(false, endpoint, params, expectedStatus);
+    }
 }
