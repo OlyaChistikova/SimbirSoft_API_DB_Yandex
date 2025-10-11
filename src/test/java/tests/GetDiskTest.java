@@ -30,7 +30,7 @@ public class GetDiskTest extends BaseTest{
     /**
      * Отправляет GET-запрос без авторизации и проверяет статус.
      */
-    public Response sendGetRequestWithoutAuth(String endpoint, Map<String, String> params, int expectedStatus) {
+    public Response sendGetRequestWithoutAuth(String endpoint, Map<String, Object> params, int expectedStatus) {
         return sendGetRequest(false, endpoint, params, expectedStatus);
     }
 }
