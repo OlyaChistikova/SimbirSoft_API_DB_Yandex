@@ -3,9 +3,19 @@
 <properties>
     <entry key="apiUrl">https://cloud-api.yandex.net/</entry>
     <entry key="token">y0__xDaloCvBRjblgMgr6mHxhQwp7PfuAho-HFFyIpGYFSCb0cdMlEy2FqwUA</entry>
-    <entry key="username">tchistikowa.o</entry>
+    <entry key="login">tchistikowa.o</entry>
     <entry key="disk_path">v1/disk</entry>
     <entry key="resources_path">v1/disk/resources</entry>
     <entry key="trash_resources_path">v1/disk/trash/resources</entry>
     <entry key="return_resources_path">v1/disk/trash/resources/restore</entry>
+    <entry key="resources_upload">v1/disk/resources/upload</entry>
+    <entry key="resources_copy">v1/disk/resources/copy</entry>
+    <entry key="resources_download">v1/disk/resources/download</entry>
+    <entry key="inputFolder">input_data</entry>
+    <entry key="outputFolder">output_data</entry>
+    <entry key="sdetFolder">sdet_data</entry>
+    <entry key="fileName">data.txt</entry>
+    <entry key="username">SDET</entry>
+    <entry key="password">secret_key</entry>
+    <entry key="outputFilePath">src/test/resources/new_data.txt</entry>
 </properties>
