@@ -43,7 +43,7 @@ public class BaseTest {
      * @param params название или путь ресурса.
      * @param expectedStatus ожидаемый статус код.
      */
-    public Response getResource(String endpoint, Map<String, String> params, int expectedStatus) {
+    public Response getResource(String endpoint, Map<String, Object> params, int expectedStatus) {
         return BaseRequests.sendGetRequest(true, endpoint, params, expectedStatus);
     }
 }
