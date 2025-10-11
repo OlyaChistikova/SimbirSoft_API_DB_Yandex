@@ -97,6 +97,16 @@ public class BaseRequests {
     public static final String OUTPUT_FILE_PATH = ParametersProvider.getProperty("outputFilePath");
 
     /**
+     * Путь к списку файлов.
+     */
+    public static final String RESOURCES_FILES = ParametersProvider.getProperty("resources_files");
+
+    /**
+     * Путь к json схеме.
+     */
+    public static final String JSON_SCHEMA = ParametersProvider.getProperty("schemaJsonPath");
+
+    /**
      * Создает конфигурацию запроса с авторизацией.
      *
      * @return объект RequestSpecification с настройками для авторизованного запроса.
@@ -142,7 +152,7 @@ public class BaseRequests {
      * @param expectedStatus ожидаемый HTTP статус ответа.
      * @return объект Response с ответом сервера.
      */
-    public static Response sendGetRequest(boolean withAuth, String endpoint, Map<String, String> params, int expectedStatus) {
+    public static Response sendGetRequest(boolean withAuth, String endpoint, Map<String, Object> params, int expectedStatus) {
         return given()
                 .spec(withAuth ? getRequestSpecWithAuth() : getRequestSpecWithoutAuth())
                 .params(params != null ? params : Map.of())
